@@ -248,18 +248,23 @@ Tabel berikut menunjukkan hasil evaluasi lengkap dari keempat model:
 Diagram batang di bawah menunjukkan perbandingan visual dari accuracy, precision, recall, f1-score, dan ROC-AUC tiap model:
 
 **Perbandingan accuracy berbagai model**
+
 ![Akurasi](https://drive.google.com/uc?export=view&id=1A9bK9-WNzW1nYkYx0DM4uBSOFanC4TRt)
 
 **Perbandingan precision berbagai model**
+
 ![Precision](https://drive.google.com/uc?export=view&id=1Ef-8rQLmujRh_zUEfklgG9tSqw-S29RP)
 
 **Perbandingan recall berbagai model**
+
 ![Recall](https://drive.google.com/uc?export=view&id=1xFOBLV2yG6IcAwVD7AFxPUqNR79U0WHG)
 
 **Perbandingan f1-score berbagai model**
+
 ![F1](https://drive.google.com/uc?export=view&id=1onlnanbB4lIEDK7rPv2LfFruGsffEkLz)
 
 **Perbandingan ROC-AUC berbagai model**
+
 ![ROC AUC](https://drive.google.com/uc?export=view&id=1IqOFfIUhrb7OTMg-1RQE9f_m2NF0xpl5)
 
 - Meskipun Random Forest menunjukkan akurasi tertinggi (0.918), model ini hanya mendeteksi sekitar 6% kasus stroke (recall = 0.061).

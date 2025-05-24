@@ -246,6 +246,7 @@ Tabel berikut menunjukkan hasil evaluasi lengkap dari keempat model:
 | **ROC-AUC**   | 0.631     | **0.777**     | 0.739     | 0.573       |
 
 Diagram batang di bawah menunjukkan perbandingan visual dari accuracy, precision, recall, f1-score, dan ROC-AUC tiap model:
+
 **Perbandingan accuracy berbagai model**
 ![Akurasi](https://drive.google.com/uc?export=view&id=1A9bK9-WNzW1nYkYx0DM4uBSOFanC4TRt)
 

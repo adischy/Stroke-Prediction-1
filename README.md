@@ -72,8 +72,8 @@ Terdapat missing value pada salah satu fitur di dataset.
 
 Dataset mempunyai nilai outliers pada fitur-fitur numerical. Fitur avg_glucose_leve dan bmi memiliki jumlah outliers paling banyak.
 
-![bp1](https://drive.google.com/uc?export=view&id=1LeqGjA_Cu45vapT7IqNwCmoHb9Y_TUQE)
-![bp2](https://drive.google.com/uc?export=view&id=1o5JxZsQT7ReT8t3Lc2RPGKt9qdORCKYZ)
+![bp1](images/bp1.png)
+![bp2](images/bp2.png)
 
 ### Variabel-variabel pada dataset adalah sebagai berikut:
 1. `id` – ID unik untuk setiap pasien
@@ -249,23 +249,23 @@ Diagram batang di bawah menunjukkan perbandingan visual dari accuracy, precision
 
 **Perbandingan accuracy berbagai model**
 
-![Akurasi](https://drive.google.com/uc?export=view&id=1A9bK9-WNzW1nYkYx0DM4uBSOFanC4TRt)
+![Akurasi](images/Accuracy.png)
 
 **Perbandingan precision berbagai model**
 
-![Precision](https://drive.google.com/uc?export=view&id=1Ef-8rQLmujRh_zUEfklgG9tSqw-S29RP)
+![Precision](images/Precision.png)
 
 **Perbandingan recall berbagai model**
 
-![Recall](https://drive.google.com/uc?export=view&id=1xFOBLV2yG6IcAwVD7AFxPUqNR79U0WHG)
+![Recall](images/Recall.png)
 
 **Perbandingan f1-score berbagai model**
 
-![F1](https://drive.google.com/uc?export=view&id=1onlnanbB4lIEDK7rPv2LfFruGsffEkLz)
+![F1](images/F1_score.png)
 
 **Perbandingan ROC-AUC berbagai model**
 
-![ROC AUC](https://drive.google.com/uc?export=view&id=1IqOFfIUhrb7OTMg-1RQE9f_m2NF0xpl5)
+![ROC AUC](images/Roc_auc.png)
 
 - Meskipun Random Forest menunjukkan akurasi tertinggi (0.918), model ini hanya mendeteksi sekitar 6% kasus stroke (recall = 0.061).
 - Support Vector Machine (SVM) memberikan performa paling seimbang, dengan recall 30.3%, f1-score tertinggi (0.141), dan ROC-AUC yang tinggi (0.739).

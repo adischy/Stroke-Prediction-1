@@ -72,8 +72,8 @@ Terdapat missing value pada salah satu fitur di dataset.
 
 Dataset mempunyai nilai outliers pada fitur-fitur numerical. Fitur avg_glucose_leve dan bmi memiliki jumlah outliers paling banyak.
 
-![Boxplot Outliers 1](https://drive.google.com/uc?export=view&id=1JfbQ9f_i0OKtl2zMMv9pPyZG2gxyUQJe)
-![Boxplot Outliers 2](https://drive.google.com/uc?export=view&id=18C4Whluwe3YdiLS9tYWRmW8xXjbDwP8y)
+![bp1](https://drive.google.com/uc?export=view&id=1LeqGjA_Cu45vapT7IqNwCmoHb9Y_TUQE)
+![bp2](https://drive.google.com/uc?export=view&id=1o5JxZsQT7ReT8t3Lc2RPGKt9qdORCKYZ)
 
 ### Variabel-variabel pada dataset adalah sebagai berikut:
 1. `id` – ID unik untuk setiap pasien
@@ -98,6 +98,7 @@ Dataset mempunyai nilai outliers pada fitur-fitur numerical. Fitur avg_glucose_l
 * **One Hot Encoding**: Mengubah variabel kategorikal menjadi variabel numerik menggunakan teknik one-hot encoding.
 * **Menangani Outliers**: Menghapus data yang memiliki nilai outliers pada kolom `avg_glucose_level`, dan `bmi` dengan metode IQR.
 * **Data Split (Train-Test-Split)**: Membagi data menjadi 80% untuk pelatihan dan 20% untuk pengujian, dengan `stroke` sebagai target.
+* **SMOTE (Synthetic Minority Over-sampling Technique)**: Melakukan oversampling pada data training untuk menyeimbangkan jumlah kelas mayoritas dan minoritas (stroke), sehingga model dapat belajar lebih baik pada kasus stroke yang jumlahnya sedikit.
 * **Normalisasi**: Melakukan normalisasi menggunakan MinMaxScaler agar semua fitur numerik berada dalam skala 0 hingga 1.
 
 ---
@@ -120,6 +121,10 @@ Dataset mempunyai nilai outliers pada fitur-fitur numerical. Fitur avg_glucose_l
   | Train         | 3514   |
   | Test          | 879    |
 
+* **SMOTE** diterapkan pada data training untuk menyeimbangkan jumlah kasus stroke dan non-stroke, sehingga model tidak bias terhadap kelas mayoritas.
+  Sebelum SMOTE: [3382  132]
+  Setelah SMOTE: [3382 3382]
+  
 * Semua fitur numerik dinormalisasi menggunakan MinMaxScaler untuk menghindari dominasi fitur dengan skala besar dan membantu model belajar lebih optimal.
 
 ### Alasan Tahapan Data Preparation Dilakukan
@@ -129,40 +134,44 @@ Dataset mempunyai nilai outliers pada fitur-fitur numerical. Fitur avg_glucose_l
 * **Encoding categorical variables** memungkinkan algoritma machine learning memproses informasi kategorikal dalam bentuk numerik.
 * **Removing outliers** membantu meningkatkan kualitas data dan performa model, karena data ekstrem bisa mempengaruhi hasil pelatihan.
 * **Data splitting 80:20** memberikan keseimbangan antara pelatihan dan pengujian untuk mengevaluasi generalisasi model secara adil.
+* **SMOTE** digunakan untuk mengatasi ketidakseimbangan kelas, sehingga model tidak hanya belajar dari kelas mayoritas, tetapi juga mampu mengenali kasus stroke yang jumlahnya jauh lebih sedikit.
 * **Feature scaling dengan MinMaxScaler** membuat semua fitur berada dalam skala seragam, mempercepat konvergensi, dan meningkatkan performa algoritma yang sensitif terhadap skala fitur.
 
 ## Modeling
 
 **Tahap Modeling**
 
-- Menyiapkan DataFrame untuk Analisis Masing-Masing Model
-    ```python
-    models = pd.DataFrame(index=['accuracy_score'],
-                      columns=['KNN', 'RandomForest', 'SVM', 'Naive Bayes'])
-    ```
-    Memulai dengan menyiapkan DataFrame bernama models untuk menyimpan nilai Mean Squared Error (MSE) pada data latih dan uji untuk setiap model yang akan diuji, yaitu KNN, Random Forest, SVC, dan Naive Bayes.
+Pada tahap ini, empat algoritma klasifikasi digunakan untuk memprediksi risiko stroke, yaitu:
+
+* K-Nearest Neighbors (KNN)
+* Random Forest
+* Support Vector Machine (SVM)
+* Bernoulli Naive Bayes
+
+Seluruh model dilatih menggunakan data training hasil SMOTE (untuk mengatasi ketidakseimbangan kelas) dan telah dinormalisasi menggunakan MinMaxScaler. Untuk Random Forest dan SVM, digunakan `class_weight='balanced'` agar model lebih memperhatikan kelas minoritas (stroke).
+
 - Melatih model KNN
     ```python
     knn = KNeighborsClassifier(n_neighbors=5)
-    knn.fit(X_train, y_train)
+    knn.fit(X_train_res_scaled, y_train_res)
     ```
-    Model KNN dilatih menggunakan KNeighborsClassifier dengan parameter n_neighbors=5, yang berarti model akan memprediksi berdasarkan 5 tetangga terdekat. Model dilatih pada data latih X_train dan y_train.
+    Model KNN dilatih menggunakan KNeighborsClassifier dengan parameter n_neighbors=5, yang berarti model akan memprediksi berdasarkan 5 tetangga terdekat. Model dilatih pada data latih X_train_res_scaled dan y_train_res.
 - Melatih model Random Forest
     ```python
-    RF = RandomForestClassifier()
-    RF.fit(X_train, y_train)
+    RF = RandomForestClassifier(class_weight='balanced')
+    RF.fit(X_train_res_scaled, y_train_res)
     ```
-    Model Random Forest dilatih menggunakan RandomForestClassifier, algoritma ensemble berbasis pohon keputusan yang bekerja dengan membuat banyak pohon keputusan dan menggabungkannya untuk hasil prediksi yang lebih stabil dan akurat. Model dilatih pada data latih yang sama.
+    Model Random Forest dilatih menggunakan RandomForestClassifier(class_weight='balanced'), algoritma ensemble berbasis pohon keputusan yang bekerja dengan membuat banyak pohon keputusan dan menggabungkannya untuk hasil prediksi yang lebih stabil dan akurat. Model dilatih pada data latih yang sama.
 - Melatih model Support Vector Classifier
     ```python
-    svc = SVC()
-    svc.fit(X_train, y_train)
+    svc = SVC(probability=True, class_weight='balanced')
+    svc.fit(X_train_res_scaled, y_train_res)
     ```
-    Model Support Vector Classifier dilatih menggunakan SVC, yang bekerja dengan memisahkan kelas menggunakan hyperplane terbaik. Tidak ada parameter khusus yang diatur, sehingga menggunakan parameter default.
+    Model Support Vector Classifier dilatih menggunakan SVC(probability=True, class_weight='balanced'), yang bekerja dengan memisahkan kelas menggunakan hyperplane terbaik. Tidak ada parameter khusus yang diatur, sehingga menggunakan parameter default.
 - Melatih model Bernoulli Naive Bayes
     ```python
     NB = BernoulliNB()
-    NB.fit(X_train, y_train)
+    NB.fit(X_train_res_scaled, y_train_res)
     ```
     Model Bernoulli Naive Bayes dilatih menggunakan BernoulliNB, yang cocok untuk fitur biner. Model ini mengasumsikan bahwa fitur-fitur independen satu sama lain dalam setiap kelas. Cocok digunakan jika data telah dibinerisasi.
 
@@ -174,14 +183,14 @@ Pada tahap modeling, empat algoritma berbeda digunakan untuk memprediksi apakah 
     - Parameter: `n_neighbors=5`
     - Deskripsi: Algoritma KNN mencari 5 tetangga terdekat untuk memprediksi label berdasarkan mayoritas kelas dari tetangga-tetangga tersebut.
 - Random Forest:
-    - Parameter: default (`RandomForestClassifier()`)
-    - Deskripsi: Random Forest merupakan algoritma ensemble yang terdiri dari banyak pohon keputusan. Setiap pohon dilatih pada subset data yang berbeda untuk meningkatkan generalisasi dan akurasi.
+    - Parameter: `class_weight='balanced'`
+    - Deskripsi: Random Forest membangun banyak pohon keputusan dan menggabungkan hasilnya. Dengan `class_weight='balanced'`, model menjadi lebih sensitif terhadap kelas minoritas.
 - Support Vector Classifier (SVC):
-    - Parameter: default (`SVC()`)
-    - Deskripsi: SVC bekerja dengan mencari hyperplane terbaik yang memisahkan data dalam ruang berdimensi tinggi. Cocok untuk data dengan margin klasifikasi yang jelas.
+    - Parameter: `probability=True` dan `class_weight='balanced'`
+    - Deskripsi: SVM mencari hyperplane terbaik untuk memisahkan kelas. Dengan class_weight='balanced', model lebih peka terhadap kelas stroke yang jumlahnya sedikit.
 - Bernoulli Naive Bayes:
     - Parameter: default (`BernoulliNB()`)
-    - Deskripsi: Digunakan untuk data biner, algoritma ini mengasumsikan bahwa setiap fitur bersifat independen dan mengikuti distribusi Bernoulli.
+    - Deskripsi: Model ini mengasumsikan fitur bersifat biner dan saling independen. Cocok untuk data hasil one-hot encoding.
 
 **Kelebihan dan Kekurangan Setiap Algoritma**
 - K-Nearest Neighbors (KNN):
@@ -195,16 +204,18 @@ Pada tahap modeling, empat algoritma berbeda digunakan untuk memprediksi apakah 
     - Kelebihan:
         - Dapat menangani data kompleks dan non-linear.
         - Mengurangi risiko overfitting dengan teknik ensemble.
+        - Dapat menangani data tidak seimbang dengan `class_weight`.
     - Kekurangan:
-        - Model sulit untuk diinterpretasikan.
+        - Model sulit untuk diinterpretasikan (kurang transparan).
         - Membutuhkan lebih banyak memori dan waktu komputasi.
 - Support Vector Classifier (SVC):
     - Kelebihan:
-        - Memberikan akurasi tinggi untuk data dengan margin yang jelas.
+        - Akurasi tinggi untuk data dengan margin yang jelas.
         - Efektif pada dataset berdimensi tinggi.
+        - Dapat menangani data tidak seimbang dengan `class_weight`.
     - Kekurangan:
         - Waktu komputasi lebih tinggi terutama pada dataset besar.
-        - Parameter seperti kernel dan C perlu disesuaikan dengan hati-hati.
+        - Parameter kernel dan C perlu tuning khusus.
 - Bernoulli Naive Bayes:
     - Kelebihan:
         - Cepat dan efisien, terutama untuk data teks atau biner.
@@ -213,34 +224,52 @@ Pada tahap modeling, empat algoritma berbeda digunakan untuk memprediksi apakah 
         - Asumsi independensi antar fitur sering tidak realistis.
         - Kinerja menurun jika fitur tidak biner atau distribusinya tidak cocok.
 
-**Memilih Model Terbaik Sebagai Solusi**
-
-Setelah pelatihan dan prediksi dilakukan, akurasi dari masing-masing model dihitung dan dibandingkan:
-| Model                           | Akurasi   |
-| ------------------------------- | --------- |
-| K-Nearest Neighbors (KNN)       | 0.961     |
-| Random Forest                   | 0.961     |
-| Support Vector Classifier (SVC) | **0.962** |
-| Bernoulli Naive Bayes           | 0.957     |
-
-Diagram batang di bawah menunjukkan perbandingan visual dari akurasi tiap model:
-![accuracy](https://drive.google.com/uc?export=view&id=1M2ygS6XAL5KN7pgpmDBn3PmvpQcAibXG)
-
-- Model SVC menunjukkan akurasi tertinggi (0.962) dibandingkan dengan model lainnya.
-- Meskipun perbedaannya tidak terlalu besar, SVC dapat dipilih sebagai model terbaik untuk kasus ini.
-- Namun, apabila waktu komputasi atau kemudahan interpretasi menjadi prioritas, maka Random Forest atau Naive Bayes bisa menjadi alternatif.
-
 ## Evaluation
 
-Pada proyek ini, model yang dibangun digunakan untuk menyelesaikan **kasus klasifikasi**, sehingga **metrik evaluasi yang digunakan adalah akurasi**.
+**Memilih Model Terbaik Sebagai Solusi**
 
-**Akurasi** merupakan metrik yang mengukur seberapa tepat model dalam melakukan prediksi, yaitu dengan menghitung persentase jumlah prediksi yang benar dibandingkan dengan seluruh jumlah data yang diprediksi. Nilai akurasi dapat dihitung menggunakan rumus berikut:
+Setelah pelatihan dan prediksi dilakukan, performa dari masing-masing model dievaluasi menggunakan lima metrik utama:
 
-$$
-\text{Akurasi} = \frac{\text{Jumlah Prediksi Benar}}{\text{Total Jumlah Prediksi}} \times 100\%
-$$
+* Accuracy: Seberapa sering model membuat prediksi yang benar.
+* Precision: Proporsi prediksi stroke yang benar-benar stroke.
+* Recall: Kemampuan model dalam mendeteksi kasus stroke.
+* F1-Score: Harmoni antara precision dan recall, penting untuk data tidak seimbang.
+* ROC-AUC: Mengukur kemampuan model membedakan antara stroke dan bukan stroke.
 
-Melalui proses pemodelan dan evaluasi, telah berhasil dibangun model klasifikasi yang akurat untuk memprediksi risiko stroke berdasarkan data karakteristik pasien. Model Support Vector Machine (SVM) terbukti memberikan akurasi tertinggi dibandingkan model lain seperti K-Nearest Neighbors, Random Forest, dan Naive Bayes. Setiap tahapan data preparation—mulai dari penanganan missing value, outlier, encoding, hingga normalisasi—berkontribusi signifikan dalam meningkatkan performa model. Implementasi solusi ini memberikan dampak positif, sejalan dengan tujuan awal untuk membantu deteksi dini risiko stroke dan mendukung pengambilan keputusan dalam bidang kesehatan.
+Tabel berikut menunjukkan hasil evaluasi lengkap dari keempat model:
+| Metrik        | KNN       | Random Forest | SVM       | Naive Bayes |
+| ------------- | --------- | ------------- | --------- | ----------- |
+| **Accuracy**  | 0.859     | **0.918**     | 0.861     | 0.761       |
+| **Precision** | 0.090     | 0.047         | **0.092** | 0.032       |
+| **Recall**    | **0.303** | 0.061         | **0.303** | 0.182       |
+| **F1-Score**  | 0.139     | 0.053         | **0.141** | 0.054       |
+| **ROC-AUC**   | 0.631     | **0.777**     | 0.739     | 0.573       |
+
+Diagram batang di bawah menunjukkan perbandingan visual dari accuracy, precision, recall, f1-score, dan ROC-AUC tiap model:
+**Perbandingan accuracy berbagai model**
+![Akurasi](https://drive.google.com/uc?export=view&id=1A9bK9-WNzW1nYkYx0DM4uBSOFanC4TRt)
+
+**Perbandingan precision berbagai model**
+![Precision](https://drive.google.com/uc?export=view&id=1Ef-8rQLmujRh_zUEfklgG9tSqw-S29RP)
+
+**Perbandingan recall berbagai model**
+![Recall](https://drive.google.com/uc?export=view&id=1xFOBLV2yG6IcAwVD7AFxPUqNR79U0WHG)
+
+**Perbandingan f1-score berbagai model**
+![F1](https://drive.google.com/uc?export=view&id=1onlnanbB4lIEDK7rPv2LfFruGsffEkLz)
+
+**Perbandingan ROC-AUC berbagai model**
+![ROC AUC](https://drive.google.com/uc?export=view&id=1IqOFfIUhrb7OTMg-1RQE9f_m2NF0xpl5)
+
+- Meskipun Random Forest menunjukkan akurasi tertinggi (0.918), model ini hanya mendeteksi sekitar 6% kasus stroke (recall = 0.061).
+- Support Vector Machine (SVM) memberikan performa paling seimbang, dengan recall 30.3%, f1-score tertinggi (0.141), dan ROC-AUC yang tinggi (0.739).
+- Oleh karena itu, SVM dipilih sebagai model terbaik untuk mendeteksi stroke pada data yang tidak seimbang.
+- Namun, jika dibutuhkan kecepatan dan interpretasi yang sederhana, maka Naive Bayes atau KNN dapat dipertimbangkan sebagai alternatif.
+- Model yang dibangun menyelesaikan kasus klasifikasi biner, yaitu memprediksi apakah seorang pasien berisiko terkena stroke atau tidak.
+
+Pada kasus prediksi stroke, recall dan f1-score lebih penting daripada akurasi. Recall mengukur seberapa banyak kasus stroke yang berhasil dideteksi, sedangkan f1-score menyeimbangkan antara recall dan precision. Model dengan recall tinggi akan membantu deteksi dini risiko stroke dan mendukung pengambilan keputusan medis secara lebih tepat.
+
+Melalui proses pemodelan dan evaluasi, telah berhasil dibangun model klasifikasi yang mampu memprediksi risiko stroke berdasarkan data karakteristik pasien. Model SVM terbukti memberikan performa terbaik secara keseluruhan. Setiap tahapan data preparation—mulai dari penanganan missing value, outlier, encoding, SMOTE, hingga normalisasi—berkontribusi signifikan dalam meningkatkan performa model. Implementasi solusi ini diharapkan dapat membantu deteksi dini risiko stroke dan mendukung pengambilan keputusan di bidang kesehatan.
 
 ## Referensi
 
